@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Recorder Dashboard</title>
+    <style>
+        body {
+            font_family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .status-card {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .file-label {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .file-name {
+            color: #4CAF50;
+            font-weight: bold;
+            word-break: break-all;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        button {
+            border: none;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .btn-meeting {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+        }
+        
+        .btn-lecture {
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+        }
+
+        .btn-quick {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #message {
+            margin-top: 20px;
+            min-height: 20px;
+            text-align: center;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎙️ AI Studio</h1>
+
+    <div class="status-card">
+        <div class="file-label">Latest Recording:</div>
+        <div class="file-name" id="filename">{{ filename }}</div>
+    </div>
+
+    <div class="button-container">
+        <button class="btn-meeting" onclick="process('meeting')">
+            👥 Meeting Notes
+            <div class="spinner" id="spin-meeting"></div>
+        </button>
+
+        <button class="btn-lecture" onclick="process('lecture')">
+            🎓 Lecture / Class
+            <div class="spinner" id="spin-lecture"></div>
+        </button>
+
+        <button class="btn-quick" onclick="process('quick')">
+            ⚡ Quick Memo
+            <div class="spinner" id="spin-quick"></div>
+        </button>
+    </div>
+
+    <div id="message">Ready to process.</div>
+
+    <script>
+        function process(mode) {
+            const btns = document.querySelectorAll('button');
+            btns.forEach(b => b.disabled = true);
+            
+            document.getElementById(`spin-${mode}`).style.display = 'block';
+            document.getElementById('message').innerText = `Processing ${mode} mode... this may take a moment.`;
+            document.getElementById('message').style.color = '#fff';
+
+            fetch(`/process/${mode}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('message').innerText = `✅ Success! Saved to ${data.output}`;
+                    document.getElementById('message').style.color = '#4CAF50';
+                } else {
+                    document.getElementById('message').innerText = `❌ Error: ${data.message}`;
+                    document.getElementById('message').style.color = '#f44336';
+                }
+            })
+            .catch(err => {
+                document.getElementById('message').innerText = `❌ Network Error: ${err}`;
+            })
+            .finally(() => {
+                btns.forEach(b => b.disabled = false);
+                document.getElementById(`spin-${mode}`).style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>
