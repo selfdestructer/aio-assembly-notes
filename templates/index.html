@@ -187,6 +187,13 @@
     <div class="status-card">
         <div class="file-label">Latest Recording</div>
         <div class="file-name" id="filename">{{ filename }}</div>
+        <!-- Upload Section -->
+        <div style="margin-top: 15px;">
+            <input type="file" id="fileInput" hidden accept=".mp3,.wav,.m4a,.ogg">
+            <button onclick="document.getElementById('fileInput').click()" style="background: #333; width: 100%; padding: 10px; min-height: 40px; font-size: 0.9rem;">
+                📤 Upload New File
+            </button>
+        </div>
     </div>
 
     <div class="button-container">
@@ -229,6 +236,37 @@
     <div id="message">Ready to process.</div>
 
     <script>
+        // Handle File Upload
+        document.getElementById('fileInput').addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            document.getElementById('message').innerText = "Uploading...";
+            document.getElementById('message').style.color = "#fff";
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('filename').innerText = data.filename;
+                    document.getElementById('message').innerText = "✅ Upload Complete";
+                    document.getElementById('message').style.color = "#00E676";
+                } else {
+                    document.getElementById('message').innerText = `❌ Upload Failed: ${data.message}`;
+                    document.getElementById('message').style.color = "#f44336";
+                }
+            })
+            .catch(err => {
+                document.getElementById('message').innerText = `❌ Network Error: ${err}`;
+            });
+        });
+
         function process(mode) {
             const btns = document.querySelectorAll('button');
             const ghostShipEnabled = document.getElementById('ghostShipToggle').checked;
