@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Recorder Dashboard</title>
+    <title>Life OS - AI Dashboard</title>
     <style>
         body {
             font_family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,7 +13,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
@@ -23,13 +23,14 @@
             margin-bottom: 10px;
             font-weight: 300;
             letter-spacing: 1px;
+            color: #e0e0e0;
         }
 
         .status-card {
             background-color: #1e1e1e;
             padding: 15px;
             border-radius: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             width: 100%;
             max-width: 400px;
             text-align: center;
@@ -38,54 +39,57 @@
 
         .file-label {
             color: #888;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .file-name {
-            color: #4CAF50;
+            color: #00E676;
             font-weight: bold;
+            margin-top: 5px;
             word-break: break-all;
         }
 
         .button-container {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
             width: 100%;
             max-width: 400px;
         }
 
+        /* Full width for the main buttons */
+        .btn-full {
+            grid-column: span 2;
+        }
+
         button {
             border: none;
-            padding: 20px;
-            font-size: 1.2rem;
+            padding: 15px;
+            font-size: 1rem;
             font-weight: 600;
             color: white;
             border-radius: 12px;
             cursor: pointer;
             transition: transform 0.1s, filter 0.2s;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            min-height: 80px;
         }
 
         button:active {
             transform: scale(0.98);
         }
 
-        .btn-meeting {
-            background: linear-gradient(135deg, #2196F3, #1976D2);
-        }
-        
-        .btn-lecture {
-            background: linear-gradient(135deg, #4CAF50, #388E3C);
-        }
-
-        .btn-quick {
-            background: linear-gradient(135deg, #FF9800, #F57C00);
-        }
+        .btn-meeting { background: linear-gradient(135deg, #2196F3, #1976D2); }
+        .btn-lecture { background: linear-gradient(135deg, #4CAF50, #388E3C); }
+        .btn-story   { background: linear-gradient(135deg, #9C27B0, #7B1FA2); }
+        .btn-decision{ background: linear-gradient(135deg, #FF5722, #E64A19); }
+        .btn-quick   { background: linear-gradient(135deg, #607D8B, #455A64); }
 
         .spinner {
             display: none;
@@ -95,7 +99,7 @@
             border-radius: 50%;
             border-top-color: #fff;
             animation: spin 1s ease-in-out infinite;
-            margin-left: 10px;
+            margin-top: 8px;
         }
 
         @keyframes spin {
@@ -107,33 +111,119 @@
             min-height: 20px;
             text-align: center;
             color: #aaa;
+            font-size: 0.9rem;
+            max-width: 400px;
+        }
+
+        /* Toggle Switch for Ghost Ship */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+            background: #252525;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .toggle-label {
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #555;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #FF5722; /* Match Decision Color */
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
         }
     </style>
 </head>
 <body>
 
-    <h1>🎙️ AI Studio</h1>
+    <h1>🎙️ Life OS</h1>
 
     <div class="status-card">
-        <div class="file-label">Latest Recording:</div>
+        <div class="file-label">Latest Recording</div>
         <div class="file-name" id="filename">{{ filename }}</div>
     </div>
 
     <div class="button-container">
+        <button class="btn-story" onclick="process('story')">
+            📖 Story Mode
+            <span style="font-size:0.7em; opacity:0.8; font-weight:normal;">Non-linear Biography</span>
+            <div class="spinner" id="spin-story"></div>
+        </button>
+
+        <button class="btn-decision" onclick="process('decision')">
+            ⚖️ Decision Logic
+            <span style="font-size:0.7em; opacity:0.8; font-weight:normal;">Analyze Choices</span>
+            <div class="spinner" id="spin-decision"></div>
+        </button>
+        
         <button class="btn-meeting" onclick="process('meeting')">
-            👥 Meeting Notes
+            👥 Meeting
             <div class="spinner" id="spin-meeting"></div>
         </button>
 
         <button class="btn-lecture" onclick="process('lecture')">
-            🎓 Lecture / Class
+            🎓 Lecture
             <div class="spinner" id="spin-lecture"></div>
         </button>
 
-        <button class="btn-quick" onclick="process('quick')">
+        <button class="btn-quick btn-full" onclick="process('quick')">
             ⚡ Quick Memo
             <div class="spinner" id="spin-quick"></div>
         </button>
+    </div>
+
+    <div class="toggle-container">
+        <label class="switch">
+            <input type="checkbox" id="ghostShipToggle">
+            <span class="slider"></span>
+        </label>
+        <span class="toggle-label">👻 Enable <b>Ghost Ship</b> Simulator (Decisions Only)</span>
     </div>
 
     <div id="message">Ready to process.</div>
@@ -141,18 +231,33 @@
     <script>
         function process(mode) {
             const btns = document.querySelectorAll('button');
+            const ghostShipEnabled = document.getElementById('ghostShipToggle').checked;
+            
             btns.forEach(b => b.disabled = true);
             
             document.getElementById(`spin-${mode}`).style.display = 'block';
-            document.getElementById('message').innerText = `Processing ${mode} mode... this may take a moment.`;
+            document.getElementById('message').innerText = `Processing ${mode}...`;
             document.getElementById('message').style.color = '#fff';
 
-            fetch(`/process/${mode}`, { method: 'POST' })
+            const options = {
+                ghost_ship: ghostShipEnabled
+            };
+
+            fetch(`/process/${mode}`, { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(options)
+            })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    document.getElementById('message').innerText = `✅ Success! Saved to ${data.output}`;
-                    document.getElementById('message').style.color = '#4CAF50';
+                    // Extract just the filename for display
+                    const pathParts = data.output.split('/');
+                    const savedName = pathParts[pathParts.length - 1];
+                    document.getElementById('message').innerHTML = `✅ Saved to <b>${savedName}</b>`;
+                    document.getElementById('message').style.color = '#00E676';
                 } else {
                     document.getElementById('message').innerText = `❌ Error: ${data.message}`;
                     document.getElementById('message').style.color = '#f44336';

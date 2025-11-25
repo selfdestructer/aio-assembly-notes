@@ -2,20 +2,20 @@ from flask import Flask, render_template, request, jsonify
 import os
 import glob
 from processor import process_audio
+from context_manager import get_context, log_decision
+from ghost_ship import get_ghost_ship_prompt
 
 app = Flask(__name__)
 
 # CONFIGURATION
-# TODO: Set this to the directory where AIO Launcher saves recordings
-# For Termux, standard paths might be:
-# /sdcard/Music/Recordings/
-# /sdcard/Android/data/ ... (might be restricted)
-# For now, we default to a 'recordings' folder in the current directory for testing
-RECORDINGS_DIR = os.path.join(os.getcwd(), "recordings")
-
-# Create dir if it doesn't exist for testing
+# AIO Launcher usually saves to internal storage. Update this to your actual path.
+# Common paths: /sdcard/AIO Launcher/recordings or /sdcard/Music/Recordings
+RECORDINGS_DIR = "/sdcard/Music/Recordings" 
 if not os.path.exists(RECORDINGS_DIR):
-    os.makedirs(RECORDINGS_DIR)
+    # Fallback for testing in the dev environment
+    RECORDINGS_DIR = os.path.join(os.getcwd(), "Life_OS", "01_Inbox")
+    if not os.path.exists(RECORDINGS_DIR):
+        os.makedirs(RECORDINGS_DIR)
 
 def get_latest_recording():
     # patterns to look for audio files
@@ -44,7 +44,11 @@ def process(mode):
         return jsonify({"status": "error", "message": "No audio file found to process"})
     
     try:
-        output_file = process_audio(latest_file, mode)
+        # Capture arguments like "show_ghost_ship" from the request
+        options = request.json or {}
+        
+        output_file = process_audio(latest_file, mode, options)
+        
         if "Error" in output_file:
              return jsonify({"status": "error", "message": output_file})
              
@@ -57,4 +61,5 @@ def process(mode):
         return jsonify({"status": "error", "message": str(e)})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)

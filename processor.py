@@ -2,6 +2,8 @@ import os
 import assemblyai as aai
 from dotenv import load_dotenv
 from datetime import datetime
+from context_manager import get_context, log_decision
+from ghost_ship import get_ghost_ship_prompt
 
 # Load environment variables
 load_dotenv()
@@ -15,7 +17,7 @@ if not API_KEY:
 if API_KEY:
     aai.settings.api_key = API_KEY
 
-def get_lemur_prompt(mode):
+def get_lemur_prompt(mode, context=None):
     if mode == 'meeting':
         return """
         You are an expert executive assistant. Analyze the provided transcript and generate a comprehensive meeting report.
@@ -46,6 +48,33 @@ def get_lemur_prompt(mode):
         # Quiz Questions
         [Generate 3-5 questions to test understanding of this material]
         """
+    elif mode == 'story':
+        return f"""
+        You are a Master Biographer and Storyteller. 
+        
+        **Context from the Book of Life:**
+        {context}
+        
+        **Task:**
+        Take the provided transcript (which is a raw entry from the user's life) and weave it into the non-linear narrative of their biography.
+        
+        **Output Format:**
+        # 📖 The Living Book: New Entry
+        **Chapter Title:** [Creative Title]
+        **The Narrative:** [Write this as a compelling story scene in the third person or first person, matching the user's style. Do not just summarize; Dramatize.]
+        **Thematic Link:** [Explain how this event connects to previous themes in the Context provided]
+        """
+    elif mode == 'decision':
+        return """
+        You are a Strategic Life Advisor. Analyze this transcript where the user is discussing a decision or an outcome.
+        
+        **Output Format:**
+        # ⚖️ Decision Matrix
+        **The Dilemma:** [What was at stake?]
+        **The Choice:** [What did they do?]
+        **The Outcome:** [What happened?]
+        **Analysis:** [Was this consistent with their values? What can be learned?]
+        """
     else: # quick / default
         return """
         You are a helpful assistant. Summarize this recording briefly.
@@ -57,7 +86,10 @@ def get_lemur_prompt(mode):
         [Bullet points]
         """
 
-def process_audio(file_path, mode='quick'):
+def process_audio(file_path, mode='quick', options=None):
+    if options is None:
+        options = {}
+        
     if not os.path.exists(file_path):
         return f"Error: File not found at {file_path}"
 
@@ -68,7 +100,7 @@ def process_audio(file_path, mode='quick'):
     # Configure based on mode
     config_args = {
         "speaker_labels": mode == 'meeting',
-        "auto_chapters": mode == 'lecture',
+        "auto_chapters": mode == 'lecture' or mode == 'story',
         "entity_detection": True,
         "sentiment_analysis": True,
     }
@@ -83,25 +115,49 @@ def process_audio(file_path, mode='quick'):
             
         # --- Generate Outputs ---
         
+        # Get Context for advanced modes
+        context_data = get_context() if mode in ['story', 'decision'] else None
+        
         # 1. LeMUR Analysis
-        prompt = get_lemur_prompt(mode)
+        prompt = get_lemur_prompt(mode, context_data)
         lemur_result = transcript.lemur.task(prompt)
         ai_notes = lemur_result.response
 
-        # 2. Translation (Optional - could be added to mode config)
-        # translation = ... 
+        # 2. Special Logic: Ghost Ship (Alternate Timeline)
+        ghost_ship_content = ""
+        if mode == 'decision' and options.get('ghost_ship', False):
+             print("Calculating Alternate Timeline (Ghost Ship)...")
+             # In a real app, we'd fetch past decisions specifically related to this topic
+             past_decisions_summary = str(context_data.get('decisions', []))
+             ghost_prompt = get_ghost_ship_prompt(transcript.text, past_decisions_summary)
+             ghost_result = transcript.lemur.task(ghost_prompt)
+             ghost_ship_content = f"\n\n---\n{ghost_result.response}\n---\n"
 
         # --- Save to Markdown File ---
-        base_name = os.path.splitext(file_path)[0]
+        base_name = os.path.splitext(os.path.basename(file_path))[0]
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        output_file = f"{base_name}_{mode}_{timestamp}.md"
+        
+        # Determine output directory based on mode
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        if mode == 'story':
+            output_dir = os.path.join(base_dir, "Life_OS", "02_Library")
+        elif mode == 'decision':
+            output_dir = os.path.join(base_dir, "Life_OS", "03_Decision_Matrix")
+        else:
+            output_dir = os.path.join(base_dir, "Life_OS", "01_Inbox")
+            
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+            
+        output_file = os.path.join(output_dir, f"{base_name}_{mode}_{timestamp}.md")
         
         content = []
-        content.append(f"# {mode.capitalize()} Report: {os.path.basename(file_path)}")
+        content.append(f"# {mode.capitalize()} Report: {base_name}")
         content.append(f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n")
         
         content.append("## 🤖 AI Analysis")
         content.append(ai_notes)
+        content.append(ghost_ship_content)
         content.append("\n")
         
         if transcript.chapters:
