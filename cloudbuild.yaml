@@ -1,0 +1,43 @@
+steps:
+  # 1. Pull the latest Doppler CLI image
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args: ['-c', 'docker pull dopplerhq/cli:latest']
+
+  # 2. Build the Docker image using Doppler to inject build-time secrets (if needed)
+  # We pass the DOPPLER_TOKEN as a build argument or env var if required by the build process
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        docker build -t gcr.io/$PROJECT_ID/ghost-ship:latest .
+
+  # 3. Push the image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/ghost-ship:latest']
+
+  # 4. Deploy to Cloud Run
+  # We set the DOPPLER_TOKEN env var on the service so it can fetch secrets at runtime
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'ghost-ship'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/ghost-ship:latest'
+      - '--region'
+      - 'us-east1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'DOPPLER_TOKEN=${_DOPPLER_TOKEN}'
+
+# This tells Cloud Build to look for a substitution variable named _DOPPLER_TOKEN
+substitutions:
+  _DOPPLER_TOKEN: ''
+
+images:
+  - 'gcr.io/$PROJECT_ID/ghost-ship:latest'
