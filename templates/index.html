@@ -3,158 +3,220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life OS - AI Dashboard</title>
+    <title>Life OS | Neural Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #0f0f13;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-story: #d946ef;
+            --accent-decision: #f97316;
+            --accent-meeting: #3b82f6;
+            --accent-lecture: #10b981;
+            --accent-quick: #64748b;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --shadow-card: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
         body {
-            font_family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(217, 70, 239, 0.08), transparent 25%);
+        }
+
+        /* --- Hero Section --- */
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            animation: fadeInDown 0.8s ease-out;
         }
 
         h1 {
-            margin-bottom: 10px;
-            font-weight: 300;
-            letter-spacing: 1px;
-            color: #e0e0e0;
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
         }
 
-        .status-card {
-            background-color: #1e1e1e;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 10px;
+            font-weight: 300;
+        }
+
+        /* --- Main Container --- */
+        .dashboard {
             width: 100%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            max-width: 600px;
+            padding: 20px;
+            box-sizing: border-box;
+            animation: fadeInUp 1s ease-out 0.2s backwards;
+        }
+
+        /* --- Status & Upload Card --- */
+        .status-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 25px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: var(--shadow-card);
+        }
+
+        .status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 rgba(0,0,0,0.4);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
         .file-label {
-            color: #888;
-            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
             text-transform: uppercase;
+            color: var(--text-muted);
             letter-spacing: 1px;
         }
 
         .file-name {
-            color: #00E676;
-            font-weight: bold;
-            margin-top: 5px;
-            word-break: break-all;
+            font-family: 'JetBrains Mono', monospace;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .button-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+        .upload-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px dashed var(--glass-border);
+            color: var(--text-muted);
             width: 100%;
-            max-width: 400px;
-        }
-
-        /* Full width for the main buttons */
-        .btn-full {
-            grid-column: span 2;
-        }
-
-        button {
-            border: none;
             padding: 15px;
-            font-size: 1rem;
-            font-weight: 600;
-            color: white;
             border-radius: 12px;
             cursor: pointer;
-            transition: transform 0.1s, filter 0.2s;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .upload-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        /* --- Control Grid --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+            height: 140px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            min-height: 80px;
+            justify-content: space-between;
         }
 
-        button:active {
-            transform: scale(0.98);
+        .card:active { transform: scale(0.98); }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at top right, var(--card-color), transparent 70%);
+            opacity: 0.1;
+            transition: opacity 0.3s;
         }
 
-        .btn-meeting { background: linear-gradient(135deg, #2196F3, #1976D2); }
-        .btn-lecture { background: linear-gradient(135deg, #4CAF50, #388E3C); }
-        .btn-story   { background: linear-gradient(135deg, #9C27B0, #7B1FA2); }
-        .btn-decision{ background: linear-gradient(135deg, #FF5722, #E64A19); }
-        .btn-quick   { background: linear-gradient(135deg, #607D8B, #455A64); }
-
-        .spinner {
-            display: none;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-top: 8px;
+        .card:hover {
+            border-color: var(--card-color);
+            transform: translateY(-4px);
         }
+        
+        .card:hover::before { opacity: 0.2; }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        .card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+        .card-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 4px; }
+        .card-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
 
-        #message {
-            margin-top: 20px;
-            min-height: 20px;
-            text-align: center;
-            color: #aaa;
-            font-size: 0.9rem;
-            max-width: 400px;
-        }
+        .card.story { --card-color: var(--accent-story); }
+        .card.decision { --card-color: var(--accent-decision); }
+        .card.meeting { --card-color: var(--accent-meeting); }
+        .card.lecture { --card-color: var(--accent-lecture); }
+        
+        .full-width { grid-column: span 2; height: auto; flex-direction: row; align-items: center; }
+        .full-width .card-icon { margin-bottom: 0; margin-right: 15px; }
+        .card.quick { --card-color: var(--accent-quick); }
 
-        /* Toggle Switch for Ghost Ship */
-        .toggle-container {
+        /* --- Ghost Ship Toggle --- */
+        .ghost-ship-container {
+            background: linear-gradient(90deg, rgba(249, 115, 22, 0.05), transparent);
+            border-left: 3px solid var(--accent-decision);
+            border-radius: 12px;
+            padding: 15px 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin: 15px 0;
-            gap: 10px;
-            width: 100%;
-            max-width: 400px;
-            background: #252525;
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .toggle-label {
-            font-size: 0.9rem;
-            color: #bbb;
+            justify-content: space-between;
+            margin-bottom: 30px;
         }
 
         .switch {
             position: relative;
             display: inline-block;
-            width: 40px;
-            height: 20px;
+            width: 48px;
+            height: 26px;
         }
 
-        .switch input { 
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
+        .switch input { opacity: 0; width: 0; height: 0; }
 
         .slider {
             position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #555;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
             transition: .4s;
             border-radius: 34px;
         }
@@ -162,80 +224,147 @@
         .slider:before {
             position: absolute;
             content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
             background-color: white;
             transition: .4s;
             border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        input:checked + .slider {
-            background-color: #FF5722; /* Match Decision Color */
+        input:checked + .slider { background-color: var(--accent-decision); }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        /* --- Console Output --- */
+        .console {
+            background: #000;
+            border-radius: 16px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #333;
+            color: #666;
         }
 
-        input:checked + .slider:before {
-            transform: translateX(20px);
+        .console.active { color: #fff; border-color: #555; }
+        .console.success { color: #10b981; border-color: #10b981; background: rgba(16, 185, 129, 0.05); }
+        .console.error { color: #ef4444; border-color: #ef4444; background: rgba(239, 68, 68, 0.05); }
+
+        /* --- Animations --- */
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
         }
+        @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60% { content: '...'; } 80%, 100% { content: ''; } }
+
     </style>
 </head>
 <body>
 
-    <h1>🎙️ Life OS</h1>
+    <header>
+        <h1>Life OS</h1>
+        <div class="subtitle">AI-Augmented Autobiography & Intelligence</div>
+    </header>
 
-    <div class="status-card">
-        <div class="file-label">Latest Recording</div>
-        <div class="file-name" id="filename">{{ filename }}</div>
-        <!-- Upload Section -->
-        <div style="margin-top: 15px;">
+    <div class="dashboard">
+        
+        <!-- File Status Card -->
+        <div class="status-card">
+            <div class="file-info">
+                <span class="file-label">Target Input</span>
+                <span class="file-name" id="filename">{{ filename }}</span>
+            </div>
             <input type="file" id="fileInput" hidden accept=".mp3,.wav,.m4a,.ogg">
-            <button onclick="document.getElementById('fileInput').click()" style="background: #333; width: 100%; padding: 10px; min-height: 40px; font-size: 0.9rem;">
-                📤 Upload New File
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                <span style="font-size:1.2em">☁️</span> Upload Audio File
             </button>
+        </div>
+
+        <!-- Mode Grid -->
+        <div class="grid">
+            <div class="card story" onclick="process('story')">
+                <div class="card-icon">📖</div>
+                <div>
+                    <div class="card-title">Story Mode</div>
+                    <div class="card-desc">Weave this event into your non-linear biography.</div>
+                </div>
+            </div>
+
+            <div class="card decision" onclick="process('decision')">
+                <div class="card-icon">⚖️</div>
+                <div>
+                    <div class="card-title">Decision Logic</div>
+                    <div class="card-desc">Analyze choices and calculate outcomes.</div>
+                </div>
+            </div>
+
+            <div class="card meeting" onclick="process('meeting')">
+                <div class="card-icon">👥</div>
+                <div>
+                    <div class="card-title">Meeting</div>
+                    <div class="card-desc">Executive summaries & action items.</div>
+                </div>
+            </div>
+
+            <div class="card lecture" onclick="process('lecture')">
+                <div class="card-icon">🎓</div>
+                <div>
+                    <div class="card-title">Lecture</div>
+                    <div class="card-desc">Study guides, quizzes & chapter stops.</div>
+                </div>
+            </div>
+
+            <div class="card quick full-width" onclick="process('quick')">
+                <div class="card-icon">⚡</div>
+                <div>
+                    <div class="card-title">Quick Memo</div>
+                    <div class="card-desc">Rapid transcription and bullet points.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ghost Ship Toggle -->
+        <div class="ghost-ship-container">
+            <div style="display:flex; flex-direction:column;">
+                <span style="color:#fff; font-weight:600; font-size:0.95rem;">Ghost Ship Simulator</span>
+                <span style="color:var(--text-muted); font-size:0.8rem;">Generate alternate timeline predictions</span>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="ghostShipToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- Console Log -->
+        <div class="console" id="console">
+            System Ready. Awaiting Input.
         </div>
     </div>
 
-    <div class="button-container">
-        <button class="btn-story" onclick="process('story')">
-            📖 Story Mode
-            <span style="font-size:0.7em; opacity:0.8; font-weight:normal;">Non-linear Biography</span>
-            <div class="spinner" id="spin-story"></div>
-        </button>
-
-        <button class="btn-decision" onclick="process('decision')">
-            ⚖️ Decision Logic
-            <span style="font-size:0.7em; opacity:0.8; font-weight:normal;">Analyze Choices</span>
-            <div class="spinner" id="spin-decision"></div>
-        </button>
-        
-        <button class="btn-meeting" onclick="process('meeting')">
-            👥 Meeting
-            <div class="spinner" id="spin-meeting"></div>
-        </button>
-
-        <button class="btn-lecture" onclick="process('lecture')">
-            🎓 Lecture
-            <div class="spinner" id="spin-lecture"></div>
-        </button>
-
-        <button class="btn-quick btn-full" onclick="process('quick')">
-            ⚡ Quick Memo
-            <div class="spinner" id="spin-quick"></div>
-        </button>
-    </div>
-
-    <div class="toggle-container">
-        <label class="switch">
-            <input type="checkbox" id="ghostShipToggle">
-            <span class="slider"></span>
-        </label>
-        <span class="toggle-label">👻 Enable <b>Ghost Ship</b> Simulator (Decisions Only)</span>
-    </div>
-
-    <div id="message">Ready to process.</div>
-
     <script>
+        const consoleEl = document.getElementById('console');
+        const filenameEl = document.getElementById('filename');
+
+        function log(msg, type = 'info') {
+            consoleEl.innerText = msg;
+            consoleEl.className = `console ${type}`;
+            if (type === 'active') {
+                consoleEl.classList.add('loading-dots');
+            } else {
+                consoleEl.classList.remove('loading-dots');
+            }
+        }
+
         // Handle File Upload
         document.getElementById('fileInput').addEventListener('change', function() {
             const file = this.files[0];
@@ -244,8 +373,7 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            document.getElementById('message').innerText = "Uploading...";
-            document.getElementById('message').style.color = "#fff";
+            log('Uploading encrypted audio packet', 'active');
 
             fetch('/upload', {
                 method: 'POST',
@@ -254,28 +382,25 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    document.getElementById('filename').innerText = data.filename;
-                    document.getElementById('message').innerText = "✅ Upload Complete";
-                    document.getElementById('message').style.color = "#00E676";
+                    filenameEl.innerText = data.filename;
+                    log('Upload Complete. Ready for Analysis.', 'success');
                 } else {
-                    document.getElementById('message').innerText = `❌ Upload Failed: ${data.message}`;
-                    document.getElementById('message').style.color = "#f44336";
+                    log(`Upload Failed: ${data.message}`, 'error');
                 }
             })
             .catch(err => {
-                document.getElementById('message').innerText = `❌ Network Error: ${err}`;
+                log(`Network Error: ${err}`, 'error');
             });
         });
 
+        // Process Logic
         function process(mode) {
-            const btns = document.querySelectorAll('button');
+            // UI Feedback
             const ghostShipEnabled = document.getElementById('ghostShipToggle').checked;
-            
-            btns.forEach(b => b.disabled = true);
-            
-            document.getElementById(`spin-${mode}`).style.display = 'block';
-            document.getElementById('message').innerText = `Processing ${mode}...`;
-            document.getElementById('message').style.color = '#fff';
+            log(`Initializing ${mode.toUpperCase()} protocol`, 'active');
+
+            // Disable interaction (optional visual cue)
+            document.body.style.cursor = 'wait';
 
             const options = {
                 ghost_ship: ghostShipEnabled
@@ -283,30 +408,23 @@
 
             fetch(`/process/${mode}`, { 
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(options)
             })
             .then(response => response.json())
             .then(data => {
+                document.body.style.cursor = 'default';
                 if (data.status === 'success') {
-                    // Extract just the filename for display
                     const pathParts = data.output.split('/');
                     const savedName = pathParts[pathParts.length - 1];
-                    document.getElementById('message').innerHTML = `✅ Saved to <b>${savedName}</b>`;
-                    document.getElementById('message').style.color = '#00E676';
+                    log(`Analysis Complete. Saved to ${savedName}`, 'success');
                 } else {
-                    document.getElementById('message').innerText = `❌ Error: ${data.message}`;
-                    document.getElementById('message').style.color = '#f44336';
+                    log(`System Error: ${data.message}`, 'error');
                 }
             })
             .catch(err => {
-                document.getElementById('message').innerText = `❌ Network Error: ${err}`;
-            })
-            .finally(() => {
-                btns.forEach(b => b.disabled = false);
-                document.getElementById(`spin-${mode}`).style.display = 'none';
+                document.body.style.cursor = 'default';
+                log(`Critical Network Failure: ${err}`, 'error');
             });
         }
     </script>
